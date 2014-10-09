@@ -9,6 +9,13 @@
     <artifactId>spring-logging</artifactId>
     <version>0.1-SNAPSHOT</version>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <slf4j.version>1.7.7</slf4j.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -25,9 +32,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <properties>
-        <slf4j.version>1.7.7</slf4j.version>
-    </properties>
 
     <dependencies>
         <dependency>
