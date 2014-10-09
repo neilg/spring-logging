@@ -75,6 +75,33 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>mutationCoverage</goal>
+                        </goals>
+                        <configuration>
+                            <targetClasses>
+                                <targetClass>io.meles.*</targetClass>
+                            </targetClasses>
+                            <targetTests>
+                                <targetTest>io.meles.*</targetTest>
+                            </targetTests>
+                            <timestampedReports>false</timestampedReports>
+                            <mutators>
+                                <mutator>ALL</mutator>
+                            </mutators>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencyManagement>
