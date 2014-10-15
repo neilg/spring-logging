@@ -15,6 +15,7 @@ final class BufferingResponseWrapper extends AbstractClientHttpResponse {
     private final byte[] body;
 
     BufferingResponseWrapper(final ClientHttpResponse wrapped) throws IOException {
+        // TODO consider using a BufferedInputStream and exposing the means to mark and reset rather than slurping the whole response
         this.wrapped = wrapped;
         this.body = StreamUtils.copyToByteArray(wrapped.getBody());
     }

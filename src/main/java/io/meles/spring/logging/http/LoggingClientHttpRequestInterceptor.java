@@ -20,8 +20,15 @@ public class LoggingClientHttpRequestInterceptor implements ClientHttpRequestInt
     private final Charset defaultCharset;
 
     public LoggingClientHttpRequestInterceptor(final String messageLogger, final Charset defaultCharset) {
-        this.messageLogger = LoggerFactory.getLogger(messageLogger);
-        this.defaultCharset = defaultCharset;
+        this.messageLogger = LoggerFactory.getLogger(checkNotNull(messageLogger, "messageLogger must not be null"));
+        this.defaultCharset = checkNotNull(defaultCharset, "defaultCharset must not be null");
+    }
+
+    private <T> T checkNotNull(final T value, final String message) {
+        if (value == null) {
+            throw new NullPointerException(message);
+        }
+        return value;
     }
 
     public LoggingClientHttpRequestInterceptor(final String messageLogger) {
@@ -31,19 +38,30 @@ public class LoggingClientHttpRequestInterceptor implements ClientHttpRequestInt
     @Override
     public ClientHttpResponse intercept(final HttpRequest request, final byte[] body, final ClientHttpRequestExecution execution) throws IOException {
 
+        logRequestBody(request, body);
+
+        final ClientHttpResponse clientHttpResponse = execution.execute(request, body);
+
+        return logResponseBody(clientHttpResponse);
+    }
+
+    private void logRequestBody(final HttpRequest request, final byte[] body) {
         if (messageLogger.isDebugEnabled()) {
             final String requestBody = requestBody(request, body);
             messageLogger.debug(requestBody);
         }
+    }
 
-        ClientHttpResponse clientHttpResponse = execution.execute(request, body);
-
+    private ClientHttpResponse logResponseBody(final ClientHttpResponse clientHttpResponse) throws IOException {
+        final ClientHttpResponse result;
         if (messageLogger.isDebugEnabled()) {
-            clientHttpResponse = new BufferingResponseWrapper(clientHttpResponse);
-            final String responseBody = responseBody(clientHttpResponse);
+            result = new BufferingResponseWrapper(clientHttpResponse);
+            final String responseBody = responseBody(result);
             messageLogger.debug(responseBody);
+        } else {
+            result = clientHttpResponse;
         }
-        return clientHttpResponse;
+        return result;
     }
 
     private String requestBody(final HttpRequest request, final byte[] body) {
