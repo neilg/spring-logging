@@ -61,7 +61,11 @@ public final class BufferingResponseWrapper extends AbstractClientHttpResponse {
     }
 
     private int bytesToBuffer() {
-        final long contentLength = wrapped.getHeaders().getContentLength();
+        final HttpHeaders headers = wrapped.getHeaders();
+        if (headers == null) {
+            return maxBytesToBuffer;
+        }
+        final long contentLength = headers.getContentLength();
         return isInRange(contentLength)
                 ? (int) contentLength
                 : maxBytesToBuffer;
