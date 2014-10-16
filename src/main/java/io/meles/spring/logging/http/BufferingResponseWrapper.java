@@ -8,17 +8,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.AbstractClientHttpResponse;
 import org.springframework.http.client.ClientHttpResponse;
 
-final class BufferingResponseWrapper extends AbstractClientHttpResponse {
+public final class BufferingResponseWrapper extends AbstractClientHttpResponse {
+
+    public static final int MAX_BYTES_TO_BUFFER = 10 * 1024 * 1024;
+
+    private final int maxBytesToBuffer;
 
     private final ClientHttpResponse wrapped;
     private final BufferedInputStream body;
 
-    BufferingResponseWrapper(final ClientHttpResponse wrapped) throws IOException {
+    public BufferingResponseWrapper(final ClientHttpResponse wrapped) throws IOException {
+        this(wrapped, MAX_BYTES_TO_BUFFER);
+    }
 
-
-        // TODO consider using a BufferedInputStream and exposing the means to mark and reset rather than slurping the whole response
+    public BufferingResponseWrapper(final ClientHttpResponse wrapped, final int maxBytesToBuffer) throws IOException {
         this.wrapped = wrapped;
         this.body = new BufferedInputStream(wrapped.getBody());
+        this.maxBytesToBuffer = maxBytesToBuffer;
     }
 
     @Override
@@ -55,6 +61,13 @@ final class BufferingResponseWrapper extends AbstractClientHttpResponse {
     }
 
     private int bytesToBuffer() {
-        return 1024 * 1024; // 1MB
+        final long contentLength = wrapped.getHeaders().getContentLength();
+        return isInRange(contentLength)
+                ? (int) contentLength
+                : maxBytesToBuffer;
+    }
+
+    private boolean isInRange(long contentLength) {
+        return contentLength >= 0L && contentLength < (long) maxBytesToBuffer;
     }
 }
