@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -27,6 +28,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpResponse;
+import org.springframework.util.StreamUtils;
 
 public class LoggingClientHttpRequestInterceptorTest {
 
@@ -74,6 +76,21 @@ public class LoggingClientHttpRequestInterceptorTest {
         assertThat(testLogger.loggedEvents(), hasItem(allOf(
                 level(Level.DEBUG), message(body)
         )));
+    }
+
+    @Test
+    public void canReadResponseBodyAfterLogging() throws IOException {
+        final MockClientHttpRequest httpRequest = new MockClientHttpRequest();
+
+        final ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
+        final MockClientHttpResponse responseToReturn = new MockClientHttpResponse(new byte[]{3, 1, 4}, HttpStatus.OK);
+        final byte[] requestBodyBytes = new byte[0];
+        when(execution.execute(httpRequest, requestBodyBytes)).thenReturn(responseToReturn);
+
+        final ClientHttpResponse response = interceptorUnderTest.intercept(httpRequest, requestBodyBytes, execution);
+        verify(execution).execute(httpRequest, requestBodyBytes);
+
+        assertArrayEquals(new byte[]{3, 1, 4}, StreamUtils.copyToByteArray(response.getBody()));
     }
 
     @Test
