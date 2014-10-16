@@ -43,7 +43,9 @@ public class BufferingResponseWrapperTest {
 
     @Test
     public void bodyCanBeReread() throws IOException {
+        wrapperUnderTest.markBody();
         final byte[] bytesOne = StreamUtils.copyToByteArray(wrapperUnderTest.getBody());
+        wrapperUnderTest.resetBody();
         final byte[] bytesTwo = StreamUtils.copyToByteArray(wrapperUnderTest.getBody());
         assertArrayEquals(responseBody, bytesOne);
         assertArrayEquals(responseBody, bytesTwo);

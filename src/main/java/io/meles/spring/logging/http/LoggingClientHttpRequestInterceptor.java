@@ -55,9 +55,12 @@ public class LoggingClientHttpRequestInterceptor implements ClientHttpRequestInt
     private ClientHttpResponse logResponseBody(final ClientHttpResponse clientHttpResponse) throws IOException {
         final ClientHttpResponse result;
         if (messageLogger.isDebugEnabled()) {
-            result = new BufferingResponseWrapper(clientHttpResponse);
-            final String responseBody = responseBody(result);
+            final BufferingResponseWrapper bufferedResponse = new BufferingResponseWrapper(clientHttpResponse);
+            bufferedResponse.markBody();
+            final String responseBody = responseBody(bufferedResponse);
+            bufferedResponse.resetBody();
             messageLogger.debug(responseBody);
+            result = bufferedResponse;
         } else {
             result = clientHttpResponse;
         }
